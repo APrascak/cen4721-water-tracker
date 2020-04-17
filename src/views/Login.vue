@@ -2,25 +2,57 @@
     <div class="container">
         <h1 id="waterTracker"><router-link :to="{ name: 'Landing'}" tag="h1">Water Tracker</router-link></h1>
         <img src="../assets/logo.png">
+        <div class="row" v-if="feedback">
+            <p class="red-text">{{ feedback }}</p>
+        </div>
         <div class="row">
-            <div class="input-field col l4 offset-l4">
-                <input placeholder="Email" id="email" type="email" class="validate">
+            <div class="input-field col s12 l4 offset-l4">
+                <input placeholder="Email" id="email" type="email" class="validate" v-model="email">
             </div>
-            <div class="input-field col l4 offset-l4">
-                <input placeholder="Password" id="password" type="password" class="validate">
+            <div class="input-field col s12 l4 offset-l4">
+                <input placeholder="Password" id="password" type="password" class="validate" v-model="password">
             </div>
-            <button class="btn col l2 offset-l5">Create Account</button>
+            <button class="btn col s8 l2 offset-s2 offset-l5" @click="login">Login</button>
         </div>
     </div>
 </template>
 
 <script>
+import firebase from 'firebase'
+import '../firebase/init'
+
 export default {
     name: 'Login',
     data() {
         return {
-            
+            email: null,
+            password: null,
+            feedback: null
         }
+    },
+    methods: {
+        login() {
+            console.log(this.user)
+            console.log(this.email)
+            if (this.email && this.password) {
+                firebase.auth().signInWithEmailAndPassword(this.email, this.password)
+                .then((user) => {
+                    console.log(user)
+                    this.$router.push({ name: 'Water' })
+                })
+                .catch((err) => {
+                    this.feedback = err.message
+                })
+            }
+        }
+    },
+    mounted() {
+        if (firebase.auth().currentUser != null) {
+            this.$router.push({ name: 'Profile' })
+        }
+    },
+    created() {
+
     }
 }
 </script>

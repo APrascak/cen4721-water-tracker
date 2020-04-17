@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import firebase from 'firebase'
+import '../firebase/init'
 
 Vue.use(VueRouter)
 
@@ -8,14 +10,6 @@ Vue.use(VueRouter)
     path: '/',
     name: 'Landing',
     component: () => import('../views/Landing.vue')
-  },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
   },
   {
     path: '/signup',
@@ -30,7 +24,18 @@ Vue.use(VueRouter)
   {
     path: '/water',
     name: 'Water',
-    component: () => import('../views/Water.vue')
+    component: () => import('../views/Water.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('../views/Profile.vue'),
+    meta: {
+      requiresAuth: true
+    }
   }
 ]
 
@@ -38,6 +43,19 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(rec => rec.meta.requiresAuth)) {
+    let user = firebase.auth().currentUser
+    if (user) {
+      next()
+    } else {
+      next({ name: 'Login' })
+    }
+  } else {
+    next()
+  }
 })
 
 export default router
